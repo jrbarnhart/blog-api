@@ -11,24 +11,24 @@ router.post("/", postController.create_post);
 router.get("/", postController.get_posts);
 
 // Get a post
-router.get("/:id", postController.get_post);
+router.get("/:postId", postController.get_post);
 
 // Update a post
-router.put("/:id", postController.update_post);
+router.put("/:postId", postController.update_post);
 
 // Delete a post
-router.delete("/:id", postController.delete_post);
+router.delete("/:postId", postController.delete_post);
 
 // Add comment to post
-router.post("/:id/comments", commentController.create_comment);
+router.post("/:postId/comments", commentController.create_comment);
 
 // Get comments on post
-router.get("/:id/comments", commentController.get_comments);
+router.get("/:postId/comments", commentController.get_comments);
 
 // Update comment on post
-router.put("/:id/comments/:id", commentController.update_comment);
+router.put("/:postId/comments/:commentId", commentController.update_comment);
 
 // Delete comment on post
-router.delete("/:id/comments/:id", commentController.delete_comment);
+router.delete("/:postId/comments/:commentId", commentController.delete_comment);
 
 module.exports = router;
