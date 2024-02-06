@@ -3,6 +3,10 @@ const { body, validationResult } = require("express-validator");
 const { decode } = require("html-entities");
 
 const Post = require("../models/post");
+// Get all posts
+exports.get_posts = (req, res) => {
+  res.send("Get all posts NYI");
+};
 
 // Get a post
 exports.get_post = (req, res) => {
