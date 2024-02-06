@@ -4,27 +4,22 @@ const { decode } = require("html-entities");
 
 const Comment = require("../models/comment");
 
-// Create a user
-exports.create_user = (req, res) => {
-  res.send("Create a user NYI");
+// Create a comment
+exports.create_comment = (req, res) => {
+  res.send("Create comment NYI");
 };
 
-// Update a user
-exports.update_user = (req, res) => {
-  res.send("Update a user NYI");
+// Get comments in a post
+exports.get_comments = (req, res) => {
+  res.send("Get comments NYI");
 };
 
-// Delete a user
-exports.delete_user = (req, res) => {
-  res.send("Delete a user NYI");
+// Update a comment
+exports.update_comment = (req, res) => {
+  res.send("Update comment NYI");
 };
 
-// Log in to user account
-exports.login = (req, res) => {
-  res.send("Login NYI");
-};
-
-// Log out of user account
-exports.logout = (req, res) => {
-  res.send("Logout NYI");
+// Delete a comment
+exports.delete_comment = (req, res) => {
+  res.send("Delete comment NYI");
 };
