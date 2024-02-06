@@ -3,6 +3,12 @@ const { body, validationResult } = require("express-validator");
 const { decode } = require("html-entities");
 
 const Post = require("../models/post");
+
+// Create a post
+exports.create_post = (req, res) => {
+  res.send("Post create NYI");
+};
+
 // Get all posts
 exports.get_posts = (req, res) => {
   res.send("Get all posts NYI");
@@ -16,11 +22,6 @@ exports.get_post = (req, res) => {
 // Update a post
 exports.update_post = (req, res) => {
   res.send("Post update NYI");
-};
-
-// Create a post
-exports.create_post = (req, res) => {
-  res.send("Post create NYI");
 };
 
 // Delete a post
