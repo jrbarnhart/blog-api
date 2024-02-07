@@ -57,16 +57,30 @@ exports.create_user = [
     .withMessage("Admin password must be a string"),
 
   asyncHandler(async (req, res, next) => {
+    // Check for validation errors
     const validationErrors = validationResult(req);
-
-    if (!validationErrors.isEmpty()) {
+    // If admin is requested but admin pass is incorrect add error
+    if (
+      req.body.is_admin &&
+      req.body.admin_password !== process.env.ADMIN_PASSWORD
+    ) {
+      const adminPassError = {
+        type: "field",
+        value: req.body.admin_password,
+        msg: "Incorrect admin password",
+        path: "admin_password",
+        location: "body",
+      };
+      validationErrors.push(adminPassError);
+    } else if (!validationErrors.isEmpty()) {
+      // If validation errors then send error response json
       res.status(403).json({
         username: req.body.username,
         display_name: req.body.display_name,
         errors: validationErrors.array(),
       });
     } else {
-      // Input valid so create a user with hashed password
+      // Input is valid so create a user with hashed password
       bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
         if (err) {
           return next(err);
@@ -78,16 +92,8 @@ exports.create_user = [
           access: "basic",
         });
 
-        // Confirm user as admin if required
-        if (
-          req.body.is_admin === true &&
-          req.body.admin_password !== process.env.ADMIN_PASSWORD
-        ) {
-          // return error
-        } else if (
-          req.body.is_admin === true &&
-          req.body.admin_password === process.env.ADMIN_PASSWORD
-        ) {
+        // Confirm user as admin. Password checked in validation above
+        if (req.body.is_admin === true) {
           newUser.access = "admin";
         }
 
