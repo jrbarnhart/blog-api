@@ -59,6 +59,7 @@ exports.create_user = [
   asyncHandler(async (req, res, next) => {
     // Check for validation errors
     const validationErrors = validationResult(req);
+    const errors = validationErrors.array();
     // If admin is requested but admin pass is incorrect add error
     if (
       req.body.is_admin &&
@@ -71,13 +72,14 @@ exports.create_user = [
         path: "admin_password",
         location: "body",
       };
-      validationErrors.push(adminPassError);
-    } else if (!validationErrors.isEmpty()) {
+      errors.push(adminPassError);
+    }
+    if (Array.isArray(errors) && errors.length > 0) {
       // If validation errors then send error response json
       res.status(403).json({
         username: req.body.username,
         display_name: req.body.display_name,
-        errors: validationErrors.array(),
+        errors,
       });
     } else {
       // Input is valid so create a user with hashed password
