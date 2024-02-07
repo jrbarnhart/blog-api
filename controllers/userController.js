@@ -6,41 +6,53 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 // Create a user
-exports.create_user = asyncHandler(async (req, res, next) => {
-  [
-    body("username")
-      .isString()
-      .withMessage("Username must be a string")
-      .trim()
-      .escape()
-      .exists({ values: "falsy" })
-      .withMessage("Username requrired")
-      .isLength({ min: 3, max: 200 })
-      .withMessage("Username must be between 3-200 characters")
-      .isEmail()
-      .withMessage("Username must be an email")
-      .normalizeEmail()
-      .custom(async (value, { req }) => {
-        const existingUser = await User.findOne({ username: value });
-        if (existingUser) throw new Error("Username/email already in use");
-      })
-      .withMessage("Username/email already in use"),
-    body("display_name")
-      .isString()
-      .withMessage("Display name must be a string")
-      .trim()
-      .escape()
-      .exists({ values: "falsy" })
-      .withMessage("Display name required")
-      .isLength({ min: 1, max: 25 })
-      .withMessage("Display name must be between 1-25 characters"),
-    body("password"),
-    body("confirm_password"),
-    body("is_admin"),
-    body("admin_password"),
-  ];
-});
-
+exports.create_user = [
+  body("username")
+    .isString()
+    .withMessage("Username must be a string")
+    .trim()
+    .escape()
+    .exists({ values: "falsy" })
+    .withMessage("Username requrired")
+    .isLength({ min: 3, max: 200 })
+    .withMessage("Username must be between 3-200 characters")
+    .isEmail()
+    .withMessage("Username must be an email")
+    .normalizeEmail()
+    .custom(async (value, { req }) => {
+      const existingUser = await User.findOne({ username: value });
+      if (existingUser) throw new Error("Username/email already in use");
+    })
+    .withMessage("Username/email already in use"),
+  body("display_name")
+    .isString()
+    .withMessage("Display name must be a string")
+    .escape()
+    .exists({ values: "falsy" })
+    .withMessage("Display name required")
+    .isLength({ min: 1, max: 25 })
+    .withMessage("Display name must be between 1-25 characters"),
+  body("password")
+    .isString()
+    .withMessage("Password name must be a string")
+    .exists({ values: "falsy" })
+    .withMessage("Password required")
+    .isLength({ min: 8, max: 200 })
+    .withMessage("Password must be between 8-200 characters"),
+  body("confirm_password")
+    .isString()
+    .withMessage("Password confirmation must be a string")
+    .custom((value, { req }) => {
+      return value === req.body.password;
+    })
+    .withMessage("Passwords do not match"),
+  body("is_admin")
+    .isBoolean()
+    .withMessage("Incorrect admin status format")
+    .exists()
+    .withMessage("Admin status required"),
+  body("admin_password"),
+];
 // Update a user
 exports.update_user = (req, res) => {
   res.send("Update a user NYI");
