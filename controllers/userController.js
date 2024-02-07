@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const User = require("../models/user");
 
@@ -51,7 +52,27 @@ exports.create_user = [
     .withMessage("Incorrect admin status format")
     .exists()
     .withMessage("Admin status required"),
-  body("admin_password"),
+  body("admin_password")
+    .isString()
+    .withMessage("Admin password must be a string"),
+
+  asyncHandler(async (req, res, next) => {
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      res.status(401).send({
+        username: req.body.username,
+        display_name: req.body.display_name,
+        errors: validationErrors.array(),
+      });
+    } else {
+      res.send({ status: "success!" });
+      // Check admin pass if needed
+      // If good then create the user
+      // Encrypt password of user with bcrypt
+      // Save the user record
+    }
+  }),
 ];
 // Update a user
 exports.update_user = (req, res) => {
