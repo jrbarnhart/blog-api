@@ -53,6 +53,7 @@ exports.create_user = [
     .exists()
     .withMessage("Admin status required"),
   body("admin_password")
+    //Validate as string if body.is_admin is true
     .custom((value, { req }) => {
       if (req.body.is_admin === true) {
         return typeof value === "string";
