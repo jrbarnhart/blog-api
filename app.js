@@ -42,7 +42,7 @@ app.use(function (err, req, res, next) {
     success: false,
     status: errStatus,
     message: errMessage,
-    stack: process.env.NODE_ENV === "development" ? err.stack : {},
+    stack: req.app.get("env") === "development" ? err.stack : {},
   });
 });
 
