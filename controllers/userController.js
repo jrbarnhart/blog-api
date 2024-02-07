@@ -60,17 +60,46 @@ exports.create_user = [
     const validationErrors = validationResult(req);
 
     if (!validationErrors.isEmpty()) {
-      res.status(401).send({
+      res.status(403).json({
         username: req.body.username,
         display_name: req.body.display_name,
         errors: validationErrors.array(),
       });
     } else {
-      res.send({ status: "success!" });
-      // Check admin pass if needed
-      // If good then create the user
-      // Encrypt password of user with bcrypt
-      // Save the user record
+      // Input valid so create a user with hashed password
+      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+        if (err) {
+          return next(err);
+        }
+        const newUser = new User({
+          username: req.body.username,
+          display_name: req.body.display_name,
+          password: hashedPassword,
+          access: "basic",
+        });
+
+        // Confirm user as admin if required
+        if (
+          req.body.is_admin === true &&
+          req.body.admin_password !== process.env.ADMIN_PASSWORD
+        ) {
+          // return error
+        } else if (
+          req.body.is_admin === true &&
+          req.body.admin_password === process.env.ADMIN_PASSWORD
+        ) {
+          newUser.access = "admin";
+        }
+
+        // Save and return new user
+        await newUser.save();
+        res.json({
+          _id: newUser.id,
+          username: newUser.username,
+          display_name: newUser.display_name,
+          access: newUser.access,
+        });
+      });
     }
   }),
 ];
