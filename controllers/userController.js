@@ -20,7 +20,7 @@ exports.create_user = [
     .isEmail()
     .withMessage("Username must be an email")
     .normalizeEmail()
-    .custom(async (value, { req }) => {
+    .custom(async (value) => {
       const existingUser = await User.findOne({ username: value });
       if (existingUser) throw new Error("Username/email already in use");
     })
@@ -53,8 +53,13 @@ exports.create_user = [
     .exists()
     .withMessage("Admin status required"),
   body("admin_password")
-    .isString()
-    .withMessage("Admin password must be a string"),
+    .custom((value, { req }) => {
+      if (req.body.is_admin === true) {
+        return typeof value === "string";
+      }
+      return true;
+    })
+    .withMessage("Admin pass must be a string"),
 
   asyncHandler(async (req, res, next) => {
     // Check for validation errors
