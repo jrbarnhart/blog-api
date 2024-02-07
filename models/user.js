@@ -7,6 +7,7 @@ const UserSchema = new Schema({
     minLength: 3,
     maxLength: 200,
     required: true,
+    unique: true,
     validate: {
       validator: function (value) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
