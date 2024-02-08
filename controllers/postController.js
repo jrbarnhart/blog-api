@@ -72,9 +72,21 @@ exports.get_posts = asyncHandler(async (req, res, next) => {
 });
 
 // Get a post
-exports.get_post = (req, res) => {
-  res.send("Post lookup NYI");
-};
+exports.get_post = asyncHandler(async (req, res, next) => {
+  const post = await Post.findById(req.params.postId).exec();
+  if (!post) {
+    res.status(400).json({
+      success: false,
+      status: 400,
+      message: "Not found",
+    });
+  } else {
+    res.json({
+      success: true,
+      post,
+    });
+  }
+});
 
 // Update a post
 exports.update_post = (req, res) => {
