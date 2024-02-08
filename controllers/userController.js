@@ -143,29 +143,41 @@ exports.update_user = [
         errors: validationErrors.array(),
       });
     } else {
-      const updatedUser = await User.findByIdAndUpdate(
-        res.authData.user._id,
-        {
-          display_name: req.body.display_name_update,
-        },
-        { new: true }
-      );
+      if (
+        req.params.id !== res.authData.user._id &&
+        res.authData.user.access !== "admin"
+      ) {
+        // Can only update user's account unless admin
+        res.status(403).json({
+          success: false,
+          status: 403,
+          message: "Forbidden",
+        });
+      } else {
+        const updatedUser = await User.findByIdAndUpdate(
+          req.params.id,
+          {
+            display_name: req.body.display_name_update,
+          },
+          { new: true }
+        );
 
-      // Issue new token with new user info
-      jwt.sign(
-        { user: updatedUser },
-        process.env.LOGIN_TOKEN_SECRET,
-        { expiresIn: "3 days" },
-        (err, token) => {
-          if (err) {
-            next(err);
+        // Issue new token with new user info
+        jwt.sign(
+          { user: updatedUser },
+          process.env.LOGIN_TOKEN_SECRET,
+          { expiresIn: "3 days" },
+          (err, token) => {
+            if (err) {
+              next(err);
+            }
+            res.json({
+              updatedUser,
+              token,
+            });
           }
-          res.json({
-            updatedUser,
-            token,
-          });
-        }
-      );
+        );
+      }
     }
   }),
 ];
