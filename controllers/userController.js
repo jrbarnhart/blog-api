@@ -171,9 +171,35 @@ exports.update_user = [
 ];
 
 // Delete a user
-exports.delete_user = (req, res) => {
-  res.send("Delete a user NYI");
-};
+exports.delete_user = [
+  verifyToken,
+  validateToken,
+
+  asyncHandler(async (req, res, next) => {
+    if (res.authData.user.access !== "admin") {
+      res.status(403).json({
+        success: false,
+        status: 403,
+        message: "Forbidden",
+      });
+    } else {
+      if (req.params.id === res.authData.user._id) {
+        // Cannot delete currently logged into account
+        res.status(403).json({
+          success: false,
+          status: 403,
+          message: "Cannot delete account you are using",
+        });
+      } else {
+        const deletedUser = await User.findByIdAndDelete(req.params.id);
+        res.json({
+          success: true,
+          deletedUser,
+        });
+      }
+    }
+  }),
+];
 
 // Log in to user account - Logout is client side + JWT expiration
 exports.login = [
