@@ -15,7 +15,4 @@ router.delete("/:id", userController.delete_user);
 // Log in to user account
 router.post("/login", userController.login);
 
-// Log out of user account
-router.post("/logout", userController.logout);
-
 module.exports = router;
