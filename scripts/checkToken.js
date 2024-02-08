@@ -39,4 +39,16 @@ const validateToken = (req, res, next) => {
   });
 };
 
-module.exports = { verifyToken, validateToken };
+const isAdminToken = (req, res, next) => {
+  if (res.authData.user.access !== "admin") {
+    res.status(403).json({
+      success: false,
+      status: 403,
+      message: "Forbidden",
+    });
+  } else {
+    next();
+  }
+};
+
+module.exports = { verifyToken, validateToken, isAdminToken };
