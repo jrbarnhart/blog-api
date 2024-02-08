@@ -127,7 +127,7 @@ exports.delete_user = (req, res) => {
   res.send("Delete a user NYI");
 };
 
-// Log in to user account
+// Log in to user account - Logout is client side + JWT expiration
 exports.login = [
   body("username")
     .isString()
@@ -171,8 +171,3 @@ exports.login = [
     }
   }),
 ];
-
-// Log out of user account
-exports.logout = (req, res) => {
-  res.send("Logout NYI");
-};
