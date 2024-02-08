@@ -26,7 +26,7 @@ exports.create_user = [
     .withMessage("Username must be an email")
     .normalizeEmail()
     .custom(async (value) => {
-      const existingUser = await User.findOne({ username: value });
+      const existingUser = await User.findOne({ username: value }).exec();
       if (existingUser) throw new Error("Username/email already in use");
     })
     .withMessage("Username/email already in use"),
@@ -227,7 +227,7 @@ exports.login = [
 
   asyncHandler(async (req, res, next) => {
     // Authenticate user and password
-    const user = await User.findOne({ username: req.body.username });
+    const user = await User.findOne({ username: req.body.username }).exec();
     const match = user
       ? await bcrypt.compare(req.body.password, user.password)
       : undefined;
