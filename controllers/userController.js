@@ -142,7 +142,7 @@ exports.login = [
     .withMessage("Username must be an email")
     .normalizeEmail(),
 
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     // Authenticate user and password
     const user = await User.findOne({ username: req.body.username });
     const match = user
@@ -155,11 +155,19 @@ exports.login = [
         message: "Incorrect login information",
       });
     } else {
-      jwt.sign({ user }, process.env.LOGIN_TOKEN_SECRET, (err, token) => {
-        res.json({
-          token,
-        });
-      });
+      jwt.sign(
+        { user },
+        process.env.LOGIN_TOKEN_SECRET,
+        { expiresIn: "30 days" },
+        (err, token) => {
+          if (err) {
+            next(err);
+          }
+          res.json({
+            token,
+          });
+        }
+      );
     }
   }),
 ];
