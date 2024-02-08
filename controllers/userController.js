@@ -5,7 +5,11 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const User = require("../models/user");
-const { verifyToken, validateToken } = require("../scripts/checkToken");
+const {
+  verifyToken,
+  validateToken,
+  isAdminToken,
+} = require("../scripts/checkToken");
 
 // Create a user
 exports.create_user = [
@@ -186,29 +190,22 @@ exports.update_user = [
 exports.delete_user = [
   verifyToken,
   validateToken,
+  isAdminToken,
 
   asyncHandler(async (req, res, next) => {
-    if (res.authData.user.access !== "admin") {
+    if (req.params.id === res.authData.user._id) {
+      // Cannot delete currently logged into account
       res.status(403).json({
         success: false,
         status: 403,
-        message: "Forbidden",
+        message: "Cannot delete account you are using",
       });
     } else {
-      if (req.params.id === res.authData.user._id) {
-        // Cannot delete currently logged into account
-        res.status(403).json({
-          success: false,
-          status: 403,
-          message: "Cannot delete account you are using",
-        });
-      } else {
-        const deletedUser = await User.findByIdAndDelete(req.params.id);
-        res.json({
-          success: true,
-          deletedUser,
-        });
-      }
+      const deletedUser = await User.findByIdAndDelete(req.params.id);
+      res.json({
+        success: true,
+        deletedUser,
+      });
     }
   }),
 ];
