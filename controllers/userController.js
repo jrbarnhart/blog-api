@@ -128,9 +128,41 @@ exports.delete_user = (req, res) => {
 };
 
 // Log in to user account
-exports.login = (req, res) => {
-  res.send("Login NYI");
-};
+exports.login = [
+  body("username")
+    .isString()
+    .withMessage("Username must be a string")
+    .trim()
+    .escape()
+    .exists({ values: "falsy" })
+    .withMessage("Username requrired")
+    .isLength({ min: 3, max: 200 })
+    .withMessage("Username must be between 3-200 characters")
+    .isEmail()
+    .withMessage("Username must be an email")
+    .normalizeEmail(),
+
+  asyncHandler(async (req, res) => {
+    // Authenticate user and password
+    const user = await User.findOne({ username: req.body.username });
+    const match = user
+      ? await bcrypt.compare(req.body.password, user.password)
+      : undefined;
+    if (!user || !match) {
+      res.status(401).json({
+        success: false,
+        status: 401,
+        message: "Incorrect login information",
+      });
+    } else {
+      jwt.sign({ user: user }, process.env.LOGIN_TOKEN_SECRET, (err, token) => {
+        res.json({
+          token,
+        });
+      });
+    }
+  }),
+];
 
 // Log out of user account
 exports.logout = (req, res) => {
