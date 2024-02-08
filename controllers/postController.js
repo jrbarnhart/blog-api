@@ -66,9 +66,10 @@ exports.create_post = [
 ];
 
 // Get all posts
-exports.get_posts = (req, res) => {
-  res.send("Get all posts NYI");
-};
+exports.get_posts = asyncHandler(async (req, res, next) => {
+  const allPosts = await Post.find({}).exec();
+  res.json(allPosts);
+});
 
 // Get a post
 exports.get_post = (req, res) => {
