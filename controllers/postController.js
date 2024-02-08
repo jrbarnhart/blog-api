@@ -41,6 +41,8 @@ exports.create_post = [
 
     if (!validationErrors.isEmpty()) {
       res.status(403).json({
+        success: false,
+        status: 403,
         title: req.body.title,
         text: req.body.text,
         published: req.body.published,
@@ -89,9 +91,61 @@ exports.get_post = asyncHandler(async (req, res, next) => {
 });
 
 // Update a post
-exports.update_post = (req, res) => {
-  res.send("Post update NYI");
-};
+exports.update_post = [
+  verifyToken,
+  validateToken,
+  isAdminToken,
+
+  body("title")
+    .isString()
+    .withMessage("Title must be a string")
+    .trim()
+    .escape()
+    .exists({ values: "falsy" })
+    .withMessage("Title requrired")
+    .isLength({ min: 1, max: 200 })
+    .withMessage("Title must be between 3-200 characters"),
+  body("text")
+    .isString()
+    .withMessage("Post text must be a string")
+    .trim()
+    .escape()
+    .exists({ values: "falsy" })
+    .withMessage("Post text required"),
+  body("published")
+    .isBoolean()
+    .exists()
+    .withMessage("Published true/false required"),
+
+  asyncHandler(async (req, res, next) => {
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      res.status(403).json({
+        success: false,
+        status: 403,
+        title: req.body.title,
+        text: req.body.text,
+        published: req.body.published,
+        errors: validationErrors.array(),
+      });
+    } else {
+      const updatedPost = await Post.findByIdAndUpdate(
+        req.params.postId,
+        {
+          title: req.body.title,
+          text: req.body.text,
+          published: req.body.published,
+        },
+        { new: true }
+      );
+      res.json({
+        success: true,
+        updatedPost,
+      });
+    }
+  }),
+];
 
 // Delete a post
 exports.delete_post = (req, res) => {
