@@ -3,11 +3,19 @@ const { body, validationResult } = require("express-validator");
 const { decode } = require("html-entities");
 
 const Comment = require("../models/comment");
+const { verifyToken, validateToken } = require("../scripts/verifyToken");
 
 // Create a comment
-exports.create_comment = (req, res) => {
-  res.send("Create comment NYI");
-};
+exports.create_comment = [
+  verifyToken,
+  validateToken,
+  (req, res) => {
+    res.json({
+      message: "Post created NYI",
+      authData: res.authData,
+    });
+  },
+];
 
 // Get comments in a post
 exports.get_comments = (req, res) => {
