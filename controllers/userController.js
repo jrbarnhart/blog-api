@@ -155,7 +155,7 @@ exports.login = [
         message: "Incorrect login information",
       });
     } else {
-      jwt.sign({ user: user }, process.env.LOGIN_TOKEN_SECRET, (err, token) => {
+      jwt.sign({ user }, process.env.LOGIN_TOKEN_SECRET, (err, token) => {
         res.json({
           token,
         });
