@@ -33,6 +33,7 @@ const validateToken = (req, res, next) => {
         message: "Access forbidden",
       });
     } else {
+      res.authData = authData;
       next();
     }
   });
