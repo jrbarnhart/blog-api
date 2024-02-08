@@ -158,7 +158,7 @@ exports.login = [
       jwt.sign(
         { user },
         process.env.LOGIN_TOKEN_SECRET,
-        { expiresIn: "30 days" },
+        { expiresIn: "3 days" },
         (err, token) => {
           if (err) {
             next(err);
