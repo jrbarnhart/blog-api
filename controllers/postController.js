@@ -3,12 +3,17 @@ const { body, validationResult } = require("express-validator");
 const { decode } = require("html-entities");
 
 const Post = require("../models/post");
-const { verifyToken, validateToken } = require("../scripts/checkToken");
+const {
+  verifyToken,
+  validateToken,
+  isAdminToken,
+} = require("../scripts/checkToken");
 
 // Create a post
 exports.create_post = [
   verifyToken,
   validateToken,
+  isAdminToken,
 
   body("title")
     .isString()
@@ -32,38 +37,30 @@ exports.create_post = [
     .withMessage("Published true/false required"),
 
   asyncHandler(async (req, res, next) => {
-    if (res.authData.user.access !== "admin") {
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
       res.status(403).json({
-        success: false,
-        status: 403,
-        message: "Forbidden",
+        title: req.body.title,
+        text: req.body.text,
+        published: req.body.published,
+        errors: validationErrors.array(),
       });
     } else {
-      const validationErrors = validationResult(req);
+      const newPost = new Post({
+        title: req.body.title,
+        text: req.body.text,
+        author: res.authData.user._id,
+        date: new Date(),
+        published: req.body.published,
+        comments: [],
+      });
 
-      if (!validationErrors.isEmpty()) {
-        res.status(403).json({
-          title: req.body.title,
-          text: req.body.text,
-          published: req.body.published,
-          errors: validationErrors.array(),
-        });
-      } else {
-        const newPost = new Post({
-          title: req.body.title,
-          text: req.body.text,
-          author: res.authData.user._id,
-          date: new Date(),
-          published: req.body.published,
-          comments: [],
-        });
-
-        await newPost.save();
-        res.json({
-          success: true,
-          newPost,
-        });
-      }
+      await newPost.save();
+      res.json({
+        success: true,
+        newPost,
+      });
     }
   }),
 ];
