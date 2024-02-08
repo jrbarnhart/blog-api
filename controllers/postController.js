@@ -69,7 +69,21 @@ exports.create_post = [
 
 // Get all posts
 exports.get_posts = asyncHandler(async (req, res, next) => {
-  const allPosts = await Post.find({}).exec();
+  // Return unpublished posts only for admins
+  let allPosts;
+  if (res.authData.user.access === "admin") {
+    allPosts = await Post.find({}).exec();
+  } else {
+    allPosts = await Post.find({ published: true }).exec();
+  }
+  if (Array.isArray(allPosts)) {
+    allPosts.forEach((post) => {
+      const decodedTitle = decode(post.title);
+      const decodedText = decode(post.text);
+      post.title = decodedTitle;
+      post.text = decodedText;
+    });
+  }
   res.json(allPosts);
 });
 
