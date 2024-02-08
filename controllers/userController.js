@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const User = require("../models/user");
+const { verifyToken, validateToken } = require("../scripts/checkToken");
 
 // Create a user
 exports.create_user = [
@@ -28,6 +29,7 @@ exports.create_user = [
   body("display_name")
     .isString()
     .withMessage("Display name must be a string")
+    .trim()
     .escape()
     .exists({ values: "falsy" })
     .withMessage("Display name required")
@@ -117,10 +119,56 @@ exports.create_user = [
     }
   }),
 ];
-// Update a user
-exports.update_user = (req, res) => {
-  res.send("Update a user NYI");
-};
+// Update a user's display name
+exports.update_user = [
+  verifyToken,
+  validateToken,
+
+  body("display_name_update")
+    .isString()
+    .withMessage("Display name must be a string")
+    .trim()
+    .escape()
+    .exists({ values: "falsy" })
+    .withMessage("Display name required")
+    .isLength({ min: 1, max: 25 })
+    .withMessage("Display name must be between 1-25 characters"),
+
+  asyncHandler(async (req, res, next) => {
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      res.status(403).json({
+        display_name_update: req.body.display_name_update,
+        errors: validationErrors.array(),
+      });
+    } else {
+      const updatedUser = await User.findByIdAndUpdate(
+        res.authData.user._id,
+        {
+          display_name: req.body.display_name_update,
+        },
+        { new: true }
+      );
+
+      // Issue new token with new user info
+      jwt.sign(
+        { user: updatedUser },
+        process.env.LOGIN_TOKEN_SECRET,
+        { expiresIn: "3 days" },
+        (err, token) => {
+          if (err) {
+            next(err);
+          }
+          res.json({
+            updatedUser,
+            token,
+          });
+        }
+      );
+    }
+  }),
+];
 
 // Delete a user
 exports.delete_user = (req, res) => {
