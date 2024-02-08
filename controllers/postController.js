@@ -90,6 +90,12 @@ exports.get_posts = asyncHandler(async (req, res, next) => {
 // Get a post
 exports.get_post = asyncHandler(async (req, res, next) => {
   const post = await Post.findById(req.params.postId).exec();
+  // Only show unpublished posts to admins
+  if (res.authData.user.access !== "admin") {
+    if (post.published === false) {
+      post = undefined;
+    }
+  }
   if (!post) {
     res.status(400).json({
       success: false,
