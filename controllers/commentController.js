@@ -29,18 +29,27 @@ exports.create_comment = [
         errors: validationErrors.array(),
       });
     } else {
-      const newComment = new Comment({
-        text: req.body.text,
-        author: res.authData.user._id,
-        date: new Date(),
-        post: req.params.postId,
-      });
+      const postToCommentOn = await Post.findById(req.params.postId).exec();
+      if (!postToCommentOn) {
+        res.status(404).json({
+          success: false,
+          status: 404,
+          message: "Resource not found",
+        });
+      } else {
+        const newComment = new Comment({
+          text: req.body.text,
+          author: res.authData.user._id,
+          date: new Date(),
+          post: req.params.postId,
+        });
 
-      await newComment.save();
-      res.json({
-        success: true,
-        newComment,
-      });
+        await newComment.save();
+        res.json({
+          success: true,
+          newComment,
+        });
+      }
     }
   }),
 ];
