@@ -200,7 +200,7 @@ exports.update_post = [
 ];
 
 // Delete a post
-exports.delete_post = (req, res) => [
+exports.delete_post = [
   checkTokenRequired,
   validateToken,
   isAdminToken,
