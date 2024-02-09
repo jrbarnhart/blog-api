@@ -3,11 +3,11 @@ const { body, validationResult } = require("express-validator");
 const { decode } = require("html-entities");
 
 const Comment = require("../models/comment");
-const { verifyToken, validateToken } = require("../scripts/checkToken");
+const { checkTokenRequired, validateToken } = require("../scripts/checkToken");
 
 // Create a comment
 exports.create_comment = [
-  verifyToken,
+  checkTokenRequired,
   validateToken,
   (req, res) => {
     res.json({
