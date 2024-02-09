@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 // Format of token:
 // Authorization: Bearer <access_token>
 
-const verifyToken = (req, res, next) => {
+const checkTokenRequired = (req, res, next) => {
   // Get auth header value
   const bearerHeader = req.headers["authorization"];
   if (typeof bearerHeader !== "undefined") {
@@ -21,6 +21,22 @@ const verifyToken = (req, res, next) => {
       status: 403,
       message: "Access forbidden",
     });
+  }
+};
+
+const checkTokenPermissive = (req, res, next) => {
+  // Get auth header value
+  const bearerHeader = req.headers["authorization"];
+  if (typeof bearerHeader !== "undefined") {
+    // Split token at space
+    const bearer = bearerHeader.split(" ");
+    // Get token from array
+    const bearerToken = bearer[1];
+    // Set the token
+    req.token = bearerToken;
+    next();
+  } else {
+    next();
   }
 };
 
@@ -51,4 +67,8 @@ const isAdminToken = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken, validateToken, isAdminToken };
+module.exports = {
+  verifyToken: checkTokenRequired,
+  validateToken,
+  isAdminToken,
+};
