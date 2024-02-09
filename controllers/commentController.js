@@ -72,9 +72,61 @@ exports.get_comments = asyncHandler(async (req, res, next) => {
 });
 
 // Update a comment
-exports.update_comment = (req, res) => {
-  res.send("Update comment NYI");
-};
+exports.update_comment = [
+  checkTokenRequired,
+  validateToken,
+
+  body("text")
+    .isString()
+    .trim()
+    .escape()
+    .isLength({ min: 1 })
+    .withMessage("Text required"),
+
+  asyncHandler(async (req, res, next) => {
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      res.status(403).json({
+        success: false,
+        status: 403,
+        text: req.body.text,
+        errors: validationErrors.array(),
+      });
+    } else {
+      // Check that comment exists
+      const updatedComment = await Comment.findById(
+        req.params.commentId
+      ).exec();
+      if (!updatedComment) {
+        res.status(404).json({
+          success: false,
+          status: 404,
+          message: "Resource not found",
+        });
+        // Check if author or admin
+      } else if (
+        !(
+          res.authData.user._id === updatedComment.author ||
+          res.authData.user.access === "admin"
+        )
+      ) {
+        res.status(403).json({
+          success: false,
+          status: 403,
+          message: "Access forbidden",
+        });
+      } else {
+        updatedComment.text = req.body.text;
+        await updatedComment.save();
+        res.json({
+          success: true,
+          updatedComment,
+        });
+      }
+    }
+  }),
+];
 
 // Delete a comment
 exports.delete_comment = (req, res) => {
