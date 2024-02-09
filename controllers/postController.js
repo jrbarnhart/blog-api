@@ -4,14 +4,14 @@ const { decode } = require("html-entities");
 
 const Post = require("../models/post");
 const {
-  verifyToken,
+  checkTokenRequired,
   validateToken,
   isAdminToken,
 } = require("../scripts/checkToken");
 
 // Create a post
 exports.create_post = [
-  verifyToken,
+  checkTokenRequired,
   validateToken,
   isAdminToken,
 
@@ -93,7 +93,7 @@ exports.get_posts = [
         errors: validationErrors.array(),
       });
     } else if (req.body.get_unpublished === true) {
-      verifyToken(req, res, next);
+      checkTokenRequired(req, res, next);
     }
   },
 
@@ -128,31 +128,38 @@ exports.get_posts = [
 ];
 
 // Get a post
-exports.get_post = asyncHandler(async (req, res, next) => {
-  const post = await Post.findById(req.params.postId).exec();
-  // Only show unpublished posts to admins
-  if (res.authData.user.access !== "admin") {
-    if (post.published === false) {
-      post = undefined;
+exports.get_post = [
+  (req, res, next) => {
+    // If token then check if admin
+  },
+
+  asyncHandler(async (req, res, next) => {
+    const post = await Post.findById(req.params.postId).exec();
+
+    // Only show unpublished posts to admins
+    if (res.authData.user.access !== "admin") {
+      if (post.published === false) {
+        post = undefined;
+      }
     }
-  }
-  if (!post) {
-    res.status(400).json({
-      success: false,
-      status: 400,
-      message: "Not found",
-    });
-  } else {
-    res.json({
-      success: true,
-      post,
-    });
-  }
-});
+    if (!post) {
+      res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Not found",
+      });
+    } else {
+      res.json({
+        success: true,
+        post,
+      });
+    }
+  }),
+];
 
 // Update a post
 exports.update_post = [
-  verifyToken,
+  checkTokenRequired,
   validateToken,
   isAdminToken,
 

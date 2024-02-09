@@ -6,7 +6,7 @@ require("dotenv").config();
 
 const User = require("../models/user");
 const {
-  verifyToken,
+  checkTokenRequired,
   validateToken,
   isAdminToken,
 } = require("../scripts/checkToken");
@@ -125,7 +125,7 @@ exports.create_user = [
 ];
 // Update a user's display name
 exports.update_user = [
-  verifyToken,
+  checkTokenRequired,
   validateToken,
 
   body("display_name_update")
@@ -188,7 +188,7 @@ exports.update_user = [
 
 // Delete a user
 exports.delete_user = [
-  verifyToken,
+  checkTokenRequired,
   validateToken,
   isAdminToken,
 
