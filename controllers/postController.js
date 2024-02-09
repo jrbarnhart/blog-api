@@ -5,6 +5,7 @@ const { decode } = require("html-entities");
 const Post = require("../models/post");
 const {
   checkTokenRequired,
+  checkTokenPermissive,
   validateToken,
   isAdminToken,
 } = require("../scripts/checkToken");
@@ -129,20 +130,32 @@ exports.get_posts = [
 
 // Get a post
 exports.get_post = [
+  // Check for token but don't require it
+  checkTokenPermissive,
+  // If token exists, validate it
   (req, res, next) => {
-    // If token then check if admin
+    if (req.token) {
+      validateToken(req, res, next);
+    } else {
+      next();
+    }
   },
 
   asyncHandler(async (req, res, next) => {
     const post = await Post.findById(req.params.postId).exec();
 
     // Only show unpublished posts to admins
-    if (res.authData.user.access !== "admin") {
-      if (post.published === false) {
-        post = undefined;
-      }
-    }
-    if (!post) {
+    if (
+      post &&
+      post.published === false &&
+      (!res.authData || res.authData.user.access !== "admin")
+    ) {
+      res.status(403).json({
+        success: false,
+        status: 403,
+        message: "Access forbidden unpublished",
+      });
+    } else if (!post) {
       res.status(400).json({
         success: false,
         status: 400,
