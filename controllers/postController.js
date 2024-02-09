@@ -207,9 +207,17 @@ exports.delete_post = [
 
   asyncHandler(async (req, res, next) => {
     const deletedPost = await Post.findByIdAndDelete(req.params.postId);
-    res.json({
-      success: true,
-      deletedPost,
-    });
+    if (deletedPost) {
+      res.json({
+        success: true,
+        deletedPost,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Resource not found",
+      });
+    }
   }),
 ];
