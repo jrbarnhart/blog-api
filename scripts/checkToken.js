@@ -69,6 +69,7 @@ const isAdminToken = (req, res, next) => {
 
 module.exports = {
   checkTokenRequired,
+  checkTokenPermissive,
   validateToken,
   isAdminToken,
 };
