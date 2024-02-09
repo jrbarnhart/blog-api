@@ -56,7 +56,7 @@ const validateToken = (req, res, next) => {
 };
 
 const isAdminToken = (req, res, next) => {
-  if (res.authData.user.access !== "admin") {
+  if (res.authData && res.authData.user.access !== "admin") {
     res.status(403).json({
       success: false,
       status: 403,
