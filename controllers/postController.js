@@ -56,7 +56,6 @@ exports.create_post = [
         author: res.authData.user._id,
         date: new Date(),
         published: req.body.published,
-        comments: [],
       });
 
       await newPost.save();
