@@ -55,9 +55,21 @@ exports.create_comment = [
 ];
 
 // Get comments in a post
-exports.get_comments = (req, res) => {
-  res.send("Get comments NYI");
-};
+exports.get_comments = asyncHandler(async (req, res, next) => {
+  const comments = await Comment.find({ post: req.params.postId });
+  if (comments && Object.keys(comments).length >= 0) {
+    res.json({
+      success: true,
+      comments,
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      status: 404,
+      message: "Resource not found",
+    });
+  }
+});
 
 // Update a comment
 exports.update_comment = (req, res) => {
