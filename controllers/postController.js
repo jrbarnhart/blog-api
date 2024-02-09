@@ -71,24 +71,46 @@ exports.create_post = [
 exports.get_posts = [
   body("get_unpublished")
     .custom((value) => {
-      if (value) {
+      if (typeof value !== "undefined") {
         return value === true || value === false;
+      } else {
+        return true;
       }
     })
     .withMessage("Get unpublished must be boolean value"),
 
+  // Check for unpublished request and then token if needed
   (req, res, next) => {
-    if (req.body.get_unpublished === true) {
-      verifyToken;
-      validateToken;
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      res.status(403).json({
+        success: false,
+        status: 403,
+        title: req.body.title,
+        text: req.body.text,
+        published: req.body.published,
+        errors: validationErrors.array(),
+      });
+    } else if (req.body.get_unpublished === true) {
+      verifyToken(req, res, next);
     }
-    next();
+  },
+
+  (req, res, next) => {
+    if (req.token) {
+      validateToken(req, res, next);
+    }
   },
 
   asyncHandler(async (req, res, next) => {
     // Return unpublished posts only for admins
     let allPosts;
-    if (res.authData && res.authData.user.access === "admin") {
+    if (
+      res.authData &&
+      res.authData.user.access === "admin" &&
+      req.body.get_unpublished === true
+    ) {
       allPosts = await Post.find({}).exec();
     } else {
       allPosts = await Post.find({ published: true }).exec();
