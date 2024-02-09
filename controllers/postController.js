@@ -213,9 +213,9 @@ exports.delete_post = [
         deletedPost,
       });
     } else {
-      res.status(400).json({
+      res.status(404).json({
         success: false,
-        status: 400,
+        status: 404,
         message: "Resource not found",
       });
     }
