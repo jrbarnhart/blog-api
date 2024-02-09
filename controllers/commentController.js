@@ -107,7 +107,7 @@ exports.update_comment = [
         // Check if author or admin
       } else if (
         !(
-          res.authData.user._id === updatedComment.author ||
+          res.authData.user._id === updatedComment.author.toString() ||
           res.authData.user.access === "admin"
         )
       ) {
