@@ -202,10 +202,18 @@ exports.delete_user = [
       });
     } else {
       const deletedUser = await User.findByIdAndDelete(req.params.id);
-      res.json({
-        success: true,
-        deletedUser,
-      });
+      if (deletedUser) {
+        res.json({
+          success: true,
+          deletedUser,
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          status: 404,
+          message: "Resource not founc",
+        });
+      }
     }
   }),
 ];
