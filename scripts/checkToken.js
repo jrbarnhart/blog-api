@@ -60,7 +60,7 @@ const isAdminToken = (req, res, next) => {
     res.status(403).json({
       success: false,
       status: 403,
-      message: "Forbidden",
+      message: "Access forbidden",
     });
   } else {
     next();
