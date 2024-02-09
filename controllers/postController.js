@@ -200,6 +200,16 @@ exports.update_post = [
 ];
 
 // Delete a post
-exports.delete_post = (req, res) => {
-  res.send("Post delete NYI");
-};
+exports.delete_post = (req, res) => [
+  checkTokenRequired,
+  validateToken,
+  isAdminToken,
+
+  asyncHandler(async (req, res, next) => {
+    const deletedPost = await Post.findByIdAndDelete(req.params.postId);
+    res.json({
+      success: true,
+      deletedPost,
+    });
+  }),
+];
