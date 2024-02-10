@@ -12,6 +12,8 @@ const handleValidationErrors = (returnedValuesArray) => {
       // Create json response object
       const responseJson = {
         success: false,
+        status: 403,
+        values: {},
         errors: validationErrors.array(),
       };
 
@@ -28,7 +30,7 @@ const handleValidationErrors = (returnedValuesArray) => {
             );
             next(err);
           } else {
-            responseJson.value = req.body.value;
+            responseJson.values[value] = req.body[value];
           }
         });
       }
