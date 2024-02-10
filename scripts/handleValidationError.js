@@ -1,12 +1,13 @@
+const { validationResult } = require("express-validator");
+
 /* Handle validation errors object created by express validator
 
 -returnedValuesArray must be array of strings that corrospond to values on req.body that are to
-be returned with the response 
-    
--validationErrors must be the object returned from express-validator valdiationResult(req) */
+be returned with the response */
 
-const handleValidationErrors = (returnedValuesArray, validationErrors) => {
+const handleValidationErrors = (returnedValuesArray) => {
   (req, res, next) => {
+    const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
       // Create json response object
       const responseJson = {
