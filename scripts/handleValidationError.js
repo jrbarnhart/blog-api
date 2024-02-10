@@ -18,7 +18,7 @@ const handleValidationErrors = (returnedValuesArray) => {
       // Check that returnedValuesArray is an array or add an error
       if (!Array.isArray(returnedValuesArray)) {
         responseJson.errors.push({
-          message: "Returned values must be array of strings",
+          msg: "Returned values must be array of strings",
         });
       } else {
         // Add the values to the json response
