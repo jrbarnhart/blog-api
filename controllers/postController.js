@@ -9,6 +9,7 @@ const {
   validateToken,
   isAdminToken,
 } = require("../scripts/checkToken");
+const handleValidationErrors = require("../scripts/handleValidationError");
 
 // Create a post
 exports.create_post = [
@@ -37,33 +38,23 @@ exports.create_post = [
     .exists()
     .withMessage("Published true/false required"),
 
+  handleValidationErrors(["title", "text", "published"]),
+
   asyncHandler(async (req, res, next) => {
-    const validationErrors = validationResult(req);
+    console.log("Posting new post");
+    const newPost = new Post({
+      title: req.body.title,
+      text: req.body.text,
+      author: res.authData.user._id,
+      date: new Date(),
+      published: req.body.published,
+    });
 
-    if (!validationErrors.isEmpty()) {
-      res.status(403).json({
-        success: false,
-        status: 403,
-        title: req.body.title,
-        text: req.body.text,
-        published: req.body.published,
-        errors: validationErrors.array(),
-      });
-    } else {
-      const newPost = new Post({
-        title: req.body.title,
-        text: req.body.text,
-        author: res.authData.user._id,
-        date: new Date(),
-        published: req.body.published,
-      });
-
-      await newPost.save();
-      res.json({
-        success: true,
-        newPost,
-      });
-    }
+    await newPost.save();
+    res.json({
+      success: true,
+      newPost,
+    });
   }),
 ];
 
@@ -168,33 +159,22 @@ exports.update_post = [
     .exists()
     .withMessage("Published true/false required"),
 
-  asyncHandler(async (req, res, next) => {
-    const validationErrors = validationResult(req);
+  handleValidationErrors(["title", "text", "published"]),
 
-    if (!validationErrors.isEmpty()) {
-      res.status(403).json({
-        success: false,
-        status: 403,
+  asyncHandler(async (req, res, next) => {
+    const updatedPost = await Post.findByIdAndUpdate(
+      req.params.postId,
+      {
         title: req.body.title,
         text: req.body.text,
         published: req.body.published,
-        errors: validationErrors.array(),
-      });
-    } else {
-      const updatedPost = await Post.findByIdAndUpdate(
-        req.params.postId,
-        {
-          title: req.body.title,
-          text: req.body.text,
-          published: req.body.published,
-        },
-        { new: true }
-      );
-      res.json({
-        success: true,
-        updatedPost,
-      });
-    }
+      },
+      { new: true }
+    );
+    res.json({
+      success: true,
+      updatedPost,
+    });
   }),
 ];
 
