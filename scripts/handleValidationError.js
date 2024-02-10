@@ -35,3 +35,5 @@ const handleValidationErrors = (returnedValuesArray, validationErrors) => {
     }
   };
 };
+
+module.exports = handleValidationErrors;
