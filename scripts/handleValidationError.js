@@ -6,7 +6,7 @@ const { validationResult } = require("express-validator");
 be returned with the response */
 
 const handleValidationErrors = (returnedValuesArray) => {
-  (req, res, next) => {
+  return (req, res, next) => {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
       // Create json response object
