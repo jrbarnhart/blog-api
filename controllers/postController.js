@@ -9,7 +9,7 @@ const {
   validateToken,
   isAdminToken,
 } = require("../scripts/checkToken");
-const handleValidationErrors = require("../scripts/handleValidationError");
+const handleValidationError = require("../scripts/handleValidationError");
 
 // Create a post
 exports.create_post = [
@@ -38,7 +38,7 @@ exports.create_post = [
     .exists()
     .withMessage("Published true/false required"),
 
-  handleValidationErrors(["title", "text", "published"]),
+  handleValidationError(["title", "text", "published"]),
 
   asyncHandler(async (req, res, next) => {
     console.log("Posting new post");
@@ -159,7 +159,7 @@ exports.update_post = [
     .exists()
     .withMessage("Published true/false required"),
 
-  handleValidationErrors(["title", "text", "published"]),
+  handleValidationError(["title", "text", "published"]),
 
   asyncHandler(async (req, res, next) => {
     const updatedPost = await Post.findByIdAndUpdate(
