@@ -17,13 +17,16 @@ const handleValidationErrors = (returnedValuesArray) => {
 
       // Check that returnedValuesArray is an array or add an error
       if (!Array.isArray(returnedValuesArray)) {
-        responseJson.errors.push({
-          msg: "Returned values must be array of strings",
-        });
+        const err = new Error("returnedValuesArray must be an array");
+        next(err);
       } else {
         // Add the values to the json response
         returnedValuesArray.forEach((value) => {
-          if (typeof value === "string") {
+          if (typeof value !== "string") {
+            const err = new Error(
+              "returnValuesArray must contain only string values"
+            );
+          } else {
             responseJson.value = req.body.value;
           }
         });
