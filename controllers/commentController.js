@@ -129,6 +129,37 @@ exports.update_comment = [
 ];
 
 // Delete a comment
-exports.delete_comment = (req, res) => {
-  res.send("Delete comment NYI");
-};
+exports.delete_comment = [
+  checkTokenRequired,
+  validateToken,
+
+  asyncHandler(async (req, res, next) => {
+    // Check that comment exists
+    const deletedComment = await Comment.findById(req.params.commentId).exec();
+    if (!deletedComment) {
+      res.status(404).json({
+        success: false,
+        status: 404,
+        message: "Resource not found",
+      });
+      // Check if author or admin
+    } else if (
+      !(
+        res.authData.user._id === deletedComment.author.toString() ||
+        res.authData.user.access === "admin"
+      )
+    ) {
+      res.status(403).json({
+        success: false,
+        status: 403,
+        message: "Access forbidden",
+      });
+    } else {
+      await Comment.findByIdAndDelete(deletedComment.id);
+      res.json({
+        success: true,
+        deletedComment,
+      });
+    }
+  }),
+];
