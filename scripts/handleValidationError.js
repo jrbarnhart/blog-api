@@ -26,6 +26,7 @@ const handleValidationErrors = (returnedValuesArray) => {
             const err = new Error(
               "returnValuesArray must contain only string values"
             );
+            next(err);
           } else {
             responseJson.value = req.body.value;
           }
