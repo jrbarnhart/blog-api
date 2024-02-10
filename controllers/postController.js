@@ -86,7 +86,7 @@ exports.get_posts = [
         post.text = decodedText;
       });
     }
-    res.json(allPosts);
+    res.json({ success: true, allPosts });
   }),
 ];
 

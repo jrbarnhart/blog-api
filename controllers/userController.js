@@ -89,6 +89,8 @@ exports.create_user = [
     if (Array.isArray(errors) && errors.length > 0) {
       // If validation errors then send error response json
       res.status(403).json({
+        success: false,
+        status: 403,
         username: req.body.username,
         display_name: req.body.display_name,
         errors,
@@ -114,6 +116,7 @@ exports.create_user = [
         // Save and return new user
         await newUser.save();
         res.json({
+          success: true,
           _id: newUser.id,
           username: newUser.username,
           display_name: newUser.display_name,
@@ -143,6 +146,8 @@ exports.update_user = [
 
     if (!validationErrors.isEmpty()) {
       res.status(403).json({
+        success: false,
+        status: 403,
         display_name_update: req.body.display_name_update,
         errors: validationErrors.array(),
       });
@@ -176,6 +181,7 @@ exports.update_user = [
               next(err);
             }
             res.json({
+              success: true,
               updatedUser,
               token,
             });
@@ -255,6 +261,7 @@ exports.login = [
             next(err);
           }
           res.json({
+            success: true,
             token,
           });
         }
