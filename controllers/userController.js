@@ -10,6 +10,7 @@ const {
   validateToken,
   isAdminToken,
 } = require("../scripts/checkToken");
+const handleValidationErrors = require("../scripts/handleValidationErrors");
 
 // Create a user
 exports.create_user = [
@@ -68,62 +69,48 @@ exports.create_user = [
     })
     .withMessage("Admin pass must be a string"),
 
+  handleValidationErrors(["username", "display_name"]),
+
   asyncHandler(async (req, res, next) => {
-    // Check for validation errors
-    const validationErrors = validationResult(req);
-    const errors = validationErrors.array();
     // If admin is requested but admin pass is incorrect add error
     if (
       req.body.is_admin &&
       req.body.admin_password !== process.env.ADMIN_PASSWORD
     ) {
-      const adminPassError = {
-        type: "field",
-        value: req.body.admin_password,
-        msg: "Incorrect admin password",
-        path: "admin_password",
-        location: "body",
-      };
-      errors.push(adminPassError);
-    }
-    if (Array.isArray(errors) && errors.length > 0) {
-      // If validation errors then send error response json
       res.status(403).json({
         success: false,
         status: 403,
-        username: req.body.username,
-        display_name: req.body.display_name,
-        errors,
-      });
-    } else {
-      // Input is valid so create a user with hashed password
-      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
-        if (err) {
-          return next(err);
-        }
-        const newUser = new User({
-          username: req.body.username,
-          display_name: req.body.display_name,
-          password: hashedPassword,
-          access: "basic",
-        });
-
-        // Confirm user as admin. Password checked in validation above
-        if (req.body.is_admin === true) {
-          newUser.access = "admin";
-        }
-
-        // Save and return new user
-        await newUser.save();
-        res.json({
-          success: true,
-          _id: newUser.id,
-          username: newUser.username,
-          display_name: newUser.display_name,
-          access: newUser.access,
-        });
+        message: "Access Forbidden",
       });
     }
+
+    // Input is valid so create a user with hashed password
+    bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      if (err) {
+        return next(err);
+      }
+      const newUser = new User({
+        username: req.body.username,
+        display_name: req.body.display_name,
+        password: hashedPassword,
+        access: "basic",
+      });
+
+      // Confirm user as admin. Password checked in validation above
+      if (req.body.is_admin === true) {
+        newUser.access = "admin";
+      }
+
+      // Save and return new user
+      await newUser.save();
+      res.json({
+        success: true,
+        _id: newUser.id,
+        username: newUser.username,
+        display_name: newUser.display_name,
+        access: newUser.access,
+      });
+    });
   }),
 ];
 // Update a user's display name
@@ -141,53 +128,44 @@ exports.update_user = [
     .isLength({ min: 1, max: 25 })
     .withMessage("Display name must be between 1-25 characters"),
 
-  asyncHandler(async (req, res, next) => {
-    const validationErrors = validationResult(req);
+  handleValidationErrors(["display_name_update"]),
 
-    if (!validationErrors.isEmpty()) {
+  asyncHandler(async (req, res, next) => {
+    if (
+      req.params.id !== res.authData.user._id &&
+      res.authData.user.access !== "admin"
+    ) {
+      // Can only update user's account unless admin
       res.status(403).json({
         success: false,
         status: 403,
-        display_name_update: req.body.display_name_update,
-        errors: validationErrors.array(),
+        message: "Access Forbidden",
       });
     } else {
-      if (
-        req.params.id !== res.authData.user._id &&
-        res.authData.user.access !== "admin"
-      ) {
-        // Can only update user's account unless admin
-        res.status(403).json({
-          success: false,
-          status: 403,
-          message: "Forbidden",
-        });
-      } else {
-        const updatedUser = await User.findByIdAndUpdate(
-          req.params.id,
-          {
-            display_name: req.body.display_name_update,
-          },
-          { new: true }
-        );
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        {
+          display_name: req.body.display_name_update,
+        },
+        { new: true }
+      );
 
-        // Issue new token with new user info
-        jwt.sign(
-          { user: updatedUser },
-          process.env.LOGIN_TOKEN_SECRET,
-          { expiresIn: "3 days" },
-          (err, token) => {
-            if (err) {
-              next(err);
-            }
-            res.json({
-              success: true,
-              updatedUser,
-              token,
-            });
+      // Issue new token with new user info
+      jwt.sign(
+        { user: updatedUser },
+        process.env.LOGIN_TOKEN_SECRET,
+        { expiresIn: "3 days" },
+        (err, token) => {
+          if (err) {
+            next(err);
           }
-        );
-      }
+          res.json({
+            success: true,
+            updatedUser,
+            token,
+          });
+        }
+      );
     }
   }),
 ];
